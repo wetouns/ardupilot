@@ -939,12 +939,14 @@ void AP_OSD_Screen::draw_bat_volt(uint8_t x, uint8_t y)
 
     //获取电池S数，获取好之后就不用每次都去计算了
     if (cells <= 0 && v > 0) {
-        float v_div = v / 100;
+        float v_div = v * 10;
         //大于8.8v就是3，大于13.2v就是4s，大于17.6v就是5s,大于22v就是6
                 //算法的核心就是用44这个参数，最低是1s
         cells = (v_div / 44) + 1;
     }
     //单节电压画在总电压下边
+    //DEBUG代码
+//    backend->write(1, 7, false, "%1d%c", cells,0x53);
     backend->write(x,y+1, false, "%1.2f%c", (double)(v/cells), SYM_VOLT);
 }
 
@@ -1193,9 +1195,9 @@ void AP_OSD_Screen::draw_home(uint8_t x, uint8_t y)
 //雷达开始
 void AP_OSD_Screen::draw_radar(uint8_t x, uint8_t y,const struct Location &home_loc,const struct Location &plane_loc,int32_t interval)
 {
-    float dst_x, dst_y;
+    int dst_x, dst_y;
     //0.0174532925的值是1个弧度的意思，也就是PI/180，scaleLongDown参数保存的是不同纬度下，经度的距离缩放比例
-    float scaleLongDown = cosf(fabsf(home_loc.lat) * 0.0174532925);
+    float scaleLongDown = cosf(fabsf(home_loc.lat * Location::LOCATION_SCALING_FACTOR) * 0.0174532925);
     //计算出飞机位置到家位置的X轴和Y轴的垂直距离,单位是米,1度是111319.5米
     dst_y = diff_coord(home_loc.lat, plane_loc.lat);
     //在不同纬度上，1度的经度变化的距离是不一样的,所以要乘上scaleLongDown来做一个缩放以算出实际距离
@@ -1207,10 +1209,11 @@ void AP_OSD_Screen::draw_radar(uint8_t x, uint8_t y,const struct Location &home_
 
     //公式最终推导出来y=dst_y/((dst_y+step)/4.5)
     //所以由此可见，事实上是先把总距离加上一个步长然后除以4.5，再用总距离除以前面算出来的结果，那么这样算出来的结果就永远小于4.5,再取个整，就变4了
-    int32_t radar_zoom = fmaxl((fabsf(dst_y) / STEP_WIDTH),
-            (fabsf(dst_x) / STEP_WIDTH)) + 1;
-    int32_t ry = (int) (dst_y / (radar_zoom / SCALE_Y));
-    int32_t rx = (int) (dst_x / (radar_zoom / SCALE_X) + 0.5);
+    //1.004
+    int radar_zoom = (int)(fmaxl((fabsf(dst_y) / STEP_WIDTH),(fabsf(dst_x) / STEP_WIDTH)) + 1);
+    //SCALE_Y=0.018
+    int ry = (int) (dst_y / (radar_zoom / SCALE_Y));
+    int rx = (int) (dst_x / (radar_zoom / SCALE_X) + 0.5);
 
     AP_AHRS &ahrs = AP::ahrs();
     uint16_t yaw = ahrs.yaw_sensor;
@@ -1219,7 +1222,7 @@ void AP_OSD_Screen::draw_radar(uint8_t x, uint8_t y,const struct Location &home_
 }
 
 float AP_OSD_Screen::diff_coord(int32_t c1, int32_t c2){
-    return (c1 - c2) * 111319.5;
+    return (c1 - c2) * Location::LOCATION_SCALING_FACTOR;
 }
 
 int AP_OSD_Screen::normalize_angle(int a){
