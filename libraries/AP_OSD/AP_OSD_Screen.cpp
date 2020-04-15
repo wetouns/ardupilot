@@ -937,14 +937,14 @@ void AP_OSD_Screen::draw_bat_volt(uint8_t x, uint8_t y)
     float v = battery.voltage();
     backend->write(x,y, v < osd->warn_batvolt, "%c%2.1f%c", SYM_BATT_FULL + p, (double)v, SYM_VOLT);
 
-    //鑾峰彇鐢垫睜S鏁帮紝鑾峰彇濂戒箣鍚庡氨涓嶇敤姣忔閮藉幓璁＄畻浜�
+    //获取电池S数，获取好之后就不用每次都去计算了
     if (cells <= 0 && v > 0) {
         float v_div = v / 100;
-        //澶т簬8.8v灏辨槸3锛屽ぇ浜�13.2v灏辨槸4s锛屽ぇ浜�17.6v灏辨槸5s,澶т簬22v灏辨槸6
-        //绠楁硶鐨勬牳蹇冨氨鏄敤44杩欎釜鍙傛暟锛屾渶浣庢槸1s
+        //大于8.8v就是3，大于13.2v就是4s，大于17.6v就是5s,大于22v就是6
+                //算法的核心就是用44这个参数，最低是1s
         cells = (v_div / 44) + 1;
     }
-    //澧炲姞鍗曡妭鐢垫睜鐢靛帇鐨勬樉绀�
+    //单节电压画在总电压下边
     backend->write(x,y+1, false, "%1.2f%c", (double)v, SYM_VOLT);
 }
 
@@ -955,6 +955,7 @@ void AP_OSD_Screen::draw_rssi(uint8_t x, uint8_t y)
         int rssiv = ap_rssi->read_receiver_rssi_uint8();
         rssiv = (rssiv * 99) / 255;
         backend->write(x, y, rssiv < osd->warn_rssi, "%c%2d", SYM_RSSI, rssiv);
+        //方位角
         backend->write(x, y+1, false, "%3d%c", pos_angel, SYM_DEGR);
     }
 }
