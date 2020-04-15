@@ -16,13 +16,23 @@
 
 #pragma once
 
+#include <AP_HAL/AP_HAL.h>
 #include <AP_Param/AP_Param.h>
 #include <AP_Math/AP_Math.h>
 #include <AP_BLHeli/AP_BLHeli.h>
 
+#ifndef OSD_ENABLED
+#define OSD_ENABLED 0
+#endif
+
 class AP_OSD_Backend;
 
 #define AP_OSD_NUM_SCREENS 4
+
+//雷达定义
+#define STEP_WIDTH  250
+#define SCALE_X     (7.0 / STEP_WIDTH)  // SCALE_X * 2 chars grid in which the uav is drawed
+#define SCALE_Y     (4.5 / STEP_WIDTH)  // SCALE_Y * 2 chars grid in which the uav is drawed
 
 /*
   class to hold one setting
@@ -69,6 +79,8 @@ private:
     static const uint8_t message_visible_width = 26;
     static const uint8_t message_scroll_time_ms = 200;
     static const uint8_t message_scroll_delay = 5;
+    uint8_t cells = 0;
+    int32_t pos_angel;
 
     static constexpr float ah_max_pitch = DEG_TO_RAD * 20;
     //typical fpv camera has 80deg vertical field of view, 16 row of chars
@@ -146,6 +158,9 @@ private:
     void draw_gspeed(uint8_t x, uint8_t y);
     void draw_horizon(uint8_t x, uint8_t y);
     void draw_home(uint8_t x, uint8_t y);
+    void draw_radar(uint8_t x, uint8_t y,const struct Location &home_loc,const struct Location &plane_loc,int32_t interval);
+    float diff_coord(int32_t c1, int32_t c2);
+    int normalize_angle(int a);
     void draw_throttle(uint8_t x, uint8_t y);
     void draw_heading(uint8_t x, uint8_t y);
     void draw_compass(uint8_t x, uint8_t y);
@@ -195,6 +210,12 @@ public:
     /* Do not allow copies */
     AP_OSD(const AP_OSD &other) = delete;
     AP_OSD &operator=(const AP_OSD&) = delete;
+
+    // get singleton instance
+    static AP_OSD *get_singleton()
+    {
+        return _singleton;
+    }
 
     // init - perform required initialisation
     void init();
@@ -258,7 +279,14 @@ public:
     };
 
     void set_nav_info(NavInfo &nav_info);
-
+    // disable the display
+    void disable() {
+        _disable = true;
+    }
+    // enable the display
+    void enable() {
+        _disable = false;
+    }
 
 private:
     void osd_thread();
@@ -278,6 +306,7 @@ private:
     int8_t pre_fs_screen;
     bool was_armed;
     bool was_failsafe;
+    bool _disable;
 
     uint32_t last_update_ms;
     float last_distance_m;
@@ -286,4 +315,11 @@ private:
     float max_speed_mps;
     float max_current_a;
     float avg_current_a;
+
+    static AP_OSD *_singleton;
+};
+
+namespace AP
+{
+AP_OSD *osd();
 };

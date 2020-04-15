@@ -936,6 +936,16 @@ void AP_OSD_Screen::draw_bat_volt(uint8_t x, uint8_t y)
     uint8_t p = (100 - pct) / 16.6;
     float v = battery.voltage();
     backend->write(x,y, v < osd->warn_batvolt, "%c%2.1f%c", SYM_BATT_FULL + p, (double)v, SYM_VOLT);
+
+    //获取电池S数，获取好之后就不用每次都去计算了
+    if (cells <= 0 && v > 0) {
+        float v_div = v / 100;
+        //大于8.8v就是3，大于13.2v就是4s，大于17.6v就是5s,大于22v就是6
+        //算法的核心就是用44这个参数，最低是1s
+        cells = (v_div / 44) + 1;
+    }
+    //增加单节电池电压的显示
+    backend->write(x,y+1, false, "%1.2f%c", (double)v, SYM_VOLT);
 }
 
 void AP_OSD_Screen::draw_rssi(uint8_t x, uint8_t y)
@@ -945,6 +955,7 @@ void AP_OSD_Screen::draw_rssi(uint8_t x, uint8_t y)
         int rssiv = ap_rssi->read_receiver_rssi_uint8();
         rssiv = (rssiv * 99) / 255;
         backend->write(x, y, rssiv < osd->warn_rssi, "%c%2d", SYM_RSSI, rssiv);
+        backend->write(x, y+1, false, "%3d%c", pos_angel, SYM_DEGR);
     }
 }
 
@@ -1151,6 +1162,7 @@ void AP_OSD_Screen::draw_distance(uint8_t x, uint8_t y, float distance)
     backend->write(x, y, false, fmt, (double)distance_scaled, unit_icon);
 }
 
+//雷达起点
 void AP_OSD_Screen::draw_home(uint8_t x, uint8_t y)
 {
     AP_AHRS &ahrs = AP::ahrs();
@@ -1158,8 +1170,11 @@ void AP_OSD_Screen::draw_home(uint8_t x, uint8_t y)
     Location loc;
     if (ahrs.get_position(loc) && ahrs.home_is_set()) {
         const Location &home_loc = ahrs.get_home();
+        //离家距离
         float distance = home_loc.get_distance(loc);
+        //angel算出来的是回家角度，值为0到36000分度
         int32_t angle = wrap_360_cd(loc.get_bearing_to(home_loc) - ahrs.yaw_sensor);
+        //这里算出来结果是2250
         int32_t interval = 36000 / SYM_ARROW_COUNT;
         if (distance < 2.0f) {
             //avoid fast rotating arrow at small distances
@@ -1168,9 +1183,48 @@ void AP_OSD_Screen::draw_home(uint8_t x, uint8_t y)
         char arrow = SYM_ARROW_START + ((angle + interval / 2) / interval) % SYM_ARROW_COUNT;
         backend->write(x, y, false, "%c%c", SYM_HOME, arrow);
         draw_distance(x+2, y, distance);
+        draw_radar(14,6,home_loc,loc,interval);
     } else {
         backend->write(x, y, true, "%c", SYM_HOME);
     }
+}
+
+//开始绘制雷达
+void AP_OSD_Screen::draw_radar(uint8_t x, uint8_t y,const struct Location &home_loc,const struct Location &plane_loc,int32_t interval)
+{
+    float dst_x, dst_y;
+    //0.0174532925的值是1个弧度的意思，也就是PI/180，scaleLongDown参数保存的是不同纬度下，经度的距离缩放比例
+    float scaleLongDown = cosf(fabsf(home_loc.lat) * 0.0174532925);
+    //计算出飞机位置到家位置的X轴和Y轴的垂直距离,单位是米,1度是111319.5米
+    dst_y = diff_coord(home_loc.lat, plane_loc.lat);
+    //在不同纬度上，1度的经度变化的距离是不一样的,所以要乘上scaleLongDown来做一个缩放以算出实际距离
+    dst_x = diff_coord(home_loc.lng, plane_loc.lng) * scaleLongDown;
+
+    int32_t bearing = atan2f(dst_y, -dst_x) * 57.295775;
+    //以下就是方位角
+    pos_angel = normalize_angle(bearing + 90);
+
+    //公式最终推导出来y=dst_y/((dst_y+step)/4.5)
+    //所以由此可见，事实上是先把总距离加上一个步长然后除以4.5，再用总距离除以前面算出来的结果，那么这样算出来的结果就永远小于4.5,再取个整，就变4了
+    int32_t radar_zoom = fmaxl((fabsf(dst_y) / STEP_WIDTH),
+            (fabsf(dst_x) / STEP_WIDTH)) + 1;
+    int32_t ry = (int) (dst_y / (radar_zoom / SCALE_Y));
+    int32_t rx = (int) (dst_x / (radar_zoom / SCALE_X) + 0.5);
+
+    AP_AHRS &ahrs = AP::ahrs();
+    uint16_t yaw = ahrs.yaw_sensor;
+    char arrow = SYM_ARROW_START + ((yaw + interval / 2) / interval) % SYM_ARROW_COUNT;
+    backend->write(x - rx, y + ry, false, "%c", arrow);
+}
+
+float AP_OSD_Screen::diff_coord(int32_t c1, int32_t c2){
+    return (c1 - c2) * 111319.5;
+}
+
+int AP_OSD_Screen::normalize_angle(int a){
+    if(a<0)   a+=360;
+    if(a>360) a-=360;
+    return a;
 }
 
 void AP_OSD_Screen::draw_heading(uint8_t x, uint8_t y)
@@ -1235,7 +1289,7 @@ void AP_OSD_Screen::draw_aspeed(uint8_t x, uint8_t y)
     float aspd = 0.0f;
     AP_AHRS &ahrs = AP::ahrs();
     WITH_SEMAPHORE(ahrs.get_semaphore());
-    bool have_estimate = ahrs.airspeed_estimate(&aspd);
+    bool have_estimate = ahrs.airspeed_estimate(aspd);
     if (have_estimate) {
         backend->write(x, y, false, "%c%4d%c", SYM_ASPD, (int)u_scale(SPEED, aspd), u_icon(SPEED));
     } else {
@@ -1439,9 +1493,12 @@ void  AP_OSD_Screen::draw_flightime(uint8_t x, uint8_t y)
 void AP_OSD_Screen::draw_eff(uint8_t x, uint8_t y)
 {
     AP_BattMonitor &battery = AP::battery();
-    AP_AHRS &ahrs = AP::ahrs();
-    WITH_SEMAPHORE(ahrs.get_semaphore());
-    Vector2f v = ahrs.groundspeed_vector();
+    Vector2f v;
+    {
+        AP_AHRS &ahrs = AP::ahrs();
+        WITH_SEMAPHORE(ahrs.get_semaphore());
+        v = ahrs.groundspeed_vector();
+    }
     float speed = u_scale(SPEED,v.length());
     float current_amps;
     if ((speed > 2.0) && battery.current_amps(current_amps)) {
@@ -1456,15 +1513,19 @@ void AP_OSD_Screen::draw_climbeff(uint8_t x, uint8_t y)
     char unit_icon = u_icon(DISTANCE);
     Vector3f v;
     float vspd;
-    auto &ahrs = AP::ahrs();
-    WITH_SEMAPHORE(ahrs.get_semaphore());
-    if (ahrs.get_velocity_NED(v)) {
-        vspd = -v.z;
-    } else {
+    do {
+        {
+            auto &ahrs = AP::ahrs();
+            WITH_SEMAPHORE(ahrs.get_semaphore());
+            if (ahrs.get_velocity_NED(v)) {
+                vspd = -v.z;
+                break;
+            }
+        }
         auto &baro = AP::baro();
         WITH_SEMAPHORE(baro.get_semaphore());
         vspd = baro.get_climb_rate();
-    }
+    } while (false);
     if (vspd < 0.0) {
         vspd = 0.0;
     }
@@ -1572,7 +1633,6 @@ void AP_OSD_Screen::draw(void)
     DRAW_SETTING(xtrack_error);
     DRAW_SETTING(bat_volt);
     DRAW_SETTING(bat2_vlt);
-    DRAW_SETTING(rssi);
     DRAW_SETTING(current);
     DRAW_SETTING(batused);
     DRAW_SETTING(bat2used);
@@ -1587,6 +1647,7 @@ void AP_OSD_Screen::draw(void)
     DRAW_SETTING(heading);
     DRAW_SETTING(wind);
     DRAW_SETTING(home);
+    DRAW_SETTING(rssi);
     DRAW_SETTING(roll_angle);
     DRAW_SETTING(pitch_angle);
     DRAW_SETTING(temp);
