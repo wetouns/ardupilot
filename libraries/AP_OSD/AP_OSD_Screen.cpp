@@ -945,7 +945,7 @@ void AP_OSD_Screen::draw_bat_volt(uint8_t x, uint8_t y)
         cells = (v_div / 44) + 1;
     }
     //单节电压画在总电压下边
-    backend->write(x,y+1, false, "%1.2f%c", (double)v, SYM_VOLT);
+    backend->write(x,y+1, false, "%1.2f%c", (double)(v/cells), SYM_VOLT);
 }
 
 void AP_OSD_Screen::draw_rssi(uint8_t x, uint8_t y)
