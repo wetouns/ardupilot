@@ -1196,8 +1196,9 @@ void AP_OSD_Screen::draw_home(uint8_t x, uint8_t y)
 void AP_OSD_Screen::draw_radar(uint8_t x, uint8_t y,const struct Location &home_loc,const struct Location &plane_loc,int32_t interval)
 {
     int dst_x, dst_y;
+    float factor = 0.011131884502145034f;
     //0.0174532925的值是1个弧度的意思，也就是PI/180，scaleLongDown参数保存的是不同纬度下，经度的距离缩放比例
-    float scaleLongDown = cosf(fabsf(home_loc.lat * Location::LOCATION_SCALING_FACTOR) * 0.0174532925);
+    float scaleLongDown = cosf(fabsf(home_loc.lat * factor) * 0.0174532925);
     //计算出飞机位置到家位置的X轴和Y轴的垂直距离,单位是米,1度是111319.5米
     dst_y = diff_coord(home_loc.lat, plane_loc.lat);
     //在不同纬度上，1度的经度变化的距离是不一样的,所以要乘上scaleLongDown来做一个缩放以算出实际距离
@@ -1222,7 +1223,7 @@ void AP_OSD_Screen::draw_radar(uint8_t x, uint8_t y,const struct Location &home_
 }
 
 float AP_OSD_Screen::diff_coord(int32_t c1, int32_t c2){
-    return (c1 - c2) * Location::LOCATION_SCALING_FACTOR;
+    return (c1 - c2) * 0.011131884502145034f;
 }
 
 int AP_OSD_Screen::normalize_angle(int a){
