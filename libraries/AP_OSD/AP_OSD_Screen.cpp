@@ -1211,7 +1211,7 @@ void AP_OSD_Screen::draw_radar(uint8_t x, uint8_t y,const struct Location &home_
     //在不同纬度上，1度的经度变化的距离是不一样的,所以要乘上scaleLongDown来做一个缩放以算出实际距离
     dst_x = diff_coord(home_loc.lng, loc.lng) * scaleLongDown;
 
-    int32_t bearing = atan2f(dst_y, -dst_x) * 57.295775;
+    int32_t bearing = atan2f(dst_y, dst_x) * 57.295775;
     //方位角的计算
     pos_angel = normalize_angle(bearing + 90);
 
@@ -1226,14 +1226,14 @@ void AP_OSD_Screen::draw_radar(uint8_t x, uint8_t y,const struct Location &home_
     AP_AHRS &ahrs = AP::ahrs();
     uint16_t yaw = ahrs.yaw_sensor;
     char arrow = SYM_ARROW_START + ((yaw + interval / 2) / interval) % SYM_ARROW_COUNT;
-    backend->write(x - rx, y + ry, false, "%c", arrow);
+    backend->write(x + rx, y + ry, false, "%c", arrow);
 
-    backend->write(1, 7, false, "%6.3f", home_loc.lng);
-    backend->write(1, 8, false, "%6.3f", plane_loc.lng);
-    backend->write(1, 9, false, "%6.3f", bearing);
+    backend->write(1, 7, false, "%6.3f", home_loc.lng/ 10000000L);
+    backend->write(1, 8, false, "%6.3f", plane_loc.lng/ 10000000L);
+    backend->write(1, 9, false, "%6d", bearing);
     backend->write(1, 10, false, "%6.5f", scaleLongDown);
-    backend->write(1, 11, false, "%6.3f", loc.lat);
-    backend->write(1, 12, false, "%6.3f", loc.lng);
+    backend->write(1, 11, false, "%6.3f", loc.lat/ 10000000L);
+    backend->write(1, 12, false, "%6.3f", loc.lng/ 10000000L);
 }
 
 float AP_OSD_Screen::diff_coord(int32_t c1, int32_t c2){
