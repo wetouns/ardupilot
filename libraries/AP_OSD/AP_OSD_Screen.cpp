@@ -1104,6 +1104,8 @@ void AP_OSD_Screen::draw_gspeed(uint8_t x, uint8_t y)
 //Thanks to betaflight/inav for simple and clean artificial horizon visual design
 void AP_OSD_Screen::draw_horizon(uint8_t x, uint8_t y)
 {
+    horizon_x = x;
+    horizon_y = y;
     AP_AHRS &ahrs = AP::ahrs();
     WITH_SEMAPHORE(ahrs.get_semaphore());
     float roll = ahrs.roll;
@@ -1188,7 +1190,7 @@ void AP_OSD_Screen::draw_home(uint8_t x, uint8_t y)
         char arrow = SYM_ARROW_START + ((angle + interval / 2) / interval) % SYM_ARROW_COUNT;
         backend->write(x, y, false, "%c%c", SYM_HOME, arrow);
         draw_distance(x+2, y, distance);
-        draw_radar(14,6,home_loc,loc,interval);
+        draw_radar(horizon_x,horizon_y,home_loc,loc,interval);
     } else {
         backend->write(x, y, true, "%c", SYM_HOME);
     }

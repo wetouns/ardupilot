@@ -81,6 +81,8 @@ private:
     static const uint8_t message_scroll_delay = 5;
     uint8_t cells = 0;
     int32_t pos_angel;
+    uint8_t horizon_x = 0;
+    uint8_t horizon_y = 0;
 
     static constexpr float ah_max_pitch = DEG_TO_RAD * 20;
     //typical fpv camera has 80deg vertical field of view, 16 row of chars
