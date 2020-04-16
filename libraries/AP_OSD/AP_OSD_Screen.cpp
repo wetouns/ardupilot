@@ -1205,13 +1205,13 @@ void AP_OSD_Screen::draw_radar(uint8_t x, uint8_t y,const struct Location &home_
     int dst_x, dst_y;
     float factor = 0.011131884502145034f;
     //0.0174532925的值是1个弧度的意思，也就是PI/180，scaleLongDown参数保存的是不同纬度下，经度的距离缩放比例
-    float scaleLongDown = cosf(fabsf(home_loc.lat * factor) * 0.0174532925f);
+    float scaleLongDown = fabsf(cosf(fabsf(home_loc.lat * factor) * 0.0174532925f));
     //计算出飞机位置到家位置的X轴和Y轴的垂直距离,单位是米,1度是111319.5米
     dst_y = diff_coord(home_loc.lat, loc.lat);
     //在不同纬度上，1度的经度变化的距离是不一样的,所以要乘上scaleLongDown来做一个缩放以算出实际距离
     dst_x = diff_coord(home_loc.lng, loc.lng) * scaleLongDown;
 
-    int32_t bearing = atan2f(dst_y, dst_x) * 57.295775;
+    int32_t bearing = atan2f(dst_y, -dst_x) * 57.295775;
     //方位角的计算
     pos_angel = normalize_angle(bearing + 90);
 
@@ -1226,14 +1226,14 @@ void AP_OSD_Screen::draw_radar(uint8_t x, uint8_t y,const struct Location &home_
     AP_AHRS &ahrs = AP::ahrs();
     uint16_t yaw = ahrs.yaw_sensor;
     char arrow = SYM_ARROW_START + ((yaw + interval / 2) / interval) % SYM_ARROW_COUNT;
-    backend->write(x + rx, y + ry, false, "%c", arrow);
+    backend->write(x - rx, y + ry, false, "%c", arrow);
 
-    backend->write(1, 7, false, "%6.3f", home_loc.lng/ 10000000L);
-    backend->write(1, 8, false, "%6.3f", plane_loc.lng/ 10000000L);
+    backend->write(1, 7, false, "%c", home_loc.lng>0?0x2b:0x2d);
+    backend->write(1, 8, false, "%c", plane_loc.lng>0?0x2b:0x2d);
     backend->write(1, 9, false, "%6d", bearing);
-    backend->write(1, 10, false, "%6.5f", scaleLongDown);
-    backend->write(1, 11, false, "%6.3f", loc.lat/ 10000000L);
-    backend->write(1, 12, false, "%6.3f", loc.lng/ 10000000L);
+    backend->write(1, 10, false, "%6d", scaleLongDown);
+    backend->write(1, 11, false, "%6.3f", loc.lat>0?0x2b:0x2d);
+    backend->write(1, 12, false, "%6.3f", loc.lng>0?0x2b:0x2d);
 }
 
 float AP_OSD_Screen::diff_coord(int32_t c1, int32_t c2){
