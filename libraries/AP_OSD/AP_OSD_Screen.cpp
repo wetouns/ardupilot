@@ -1224,6 +1224,12 @@ void AP_OSD_Screen::draw_radar(uint8_t x, uint8_t y,const struct Location &home_
     uint16_t yaw = ahrs.yaw_sensor;
     char arrow = SYM_ARROW_START + ((yaw + interval / 2) / interval) % SYM_ARROW_COUNT;
     backend->write(x + rx, y + ry, false, "%c", arrow);
+
+//    backend->write(1, 7, false, "%9.6f", home_loc.lat);
+//    backend->write(1, 7, false, "%9.6f", home_loc.lng);
+//    backend->write(1, 7, false, "%9.6f", plane_loc.lat);
+//    backend->write(1, 7, false, "%9.6f", plane_loc.lng);
+//    backend->write(1, 7, false, "%8.4f", bearing);
 }
 
 float AP_OSD_Screen::diff_coord(int32_t c1, int32_t c2){
