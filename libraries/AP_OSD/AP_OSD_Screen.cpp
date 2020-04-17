@@ -1228,12 +1228,12 @@ void AP_OSD_Screen::draw_radar(uint8_t x, uint8_t y,const struct Location &home_
     char arrow = SYM_ARROW_START + ((yaw + interval / 2) / interval) % SYM_ARROW_COUNT;
     backend->write(x - rx, y + ry, false, "%c", arrow);
 
-    backend->write(1, 7, home_loc.lng<=0, "%c", home_loc.lng>0?0x2b:0x2d);
-    backend->write(1, 8, plane_loc.lng<=0, "%c", plane_loc.lng>0?0x2b:0x2d);
-    backend->write(1, 9, false, "%6d", bearing);
-    backend->write(1, 10, scaleLongDown<=0, "%6d", scaleLongDown);
-    backend->write(1, 11, loc.lat<=0, "%c", loc.lat>0?0x2b:0x2d);
-    backend->write(1, 12, loc.lng<=0, "%c", loc.lng>0?0x2b:0x2d);
+//    backend->write(1, 7, home_loc.lng<=0, "%c", home_loc.lng>0?0x2b:0x2d);
+//    backend->write(1, 8, plane_loc.lng<=0, "%c", plane_loc.lng>0?0x2b:0x2d);
+//    backend->write(1, 9, false, "%6d", bearing);
+//    backend->write(1, 10, scaleLongDown<=0, "%6d", scaleLongDown);
+//    backend->write(1, 11, loc.lat<=0, "%c", loc.lat>0?0x2b:0x2d);
+//    backend->write(1, 12, loc.lng<=0, "%c", loc.lng>0?0x2b:0x2d);
 }
 
 float AP_OSD_Screen::diff_coord(int32_t c1, int32_t c2){
