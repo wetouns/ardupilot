@@ -935,7 +935,7 @@ void AP_OSD_Screen::draw_bat_volt(uint8_t x, uint8_t y)
     uint8_t pct = battery.capacity_remaining_pct();
     uint8_t p = (100 - pct) / 16.6;
     float v = battery.voltage();
-    backend->write(x,y, v < osd->warn_batvolt, "%c%2.1f%c", SYM_BATT_FULL + p, (double)v, SYM_VOLT);
+
 
     //获取电池S数，获取好之后就不用每次都去计算了
     if (cells <= 0 && v > 0) {
@@ -949,6 +949,19 @@ void AP_OSD_Screen::draw_bat_volt(uint8_t x, uint8_t y)
 //    backend->write(1, 7, false, "%1d%c", cells,0x53);
     //输出5位，小数占2位
     float v_per_cell = v/cells;
+
+    float full_v = 1.2;
+    //剩余电压为当前每节电压减去3v就得到剩余电量电压
+    float remain_v = v_per_cell - 3;
+    if(remain_v < 0){
+        //如果减出负数就代表单节已经低于3V了，剩余电压直接设置成0
+        remain_v = 0;
+    }
+    float remain_v_pct = remain_v / full_v;
+
+    //画总电压
+    backend->write(x,y, v < osd->warn_batvolt, "%c%2.1f%c", SYM_BATT_FULL + p, (double)v, SYM_VOLT);
+    //画单节电压
     backend->write(x,y+1, false, "%5.2f%c", v_per_cell, SYM_VOLT);
 }
 
