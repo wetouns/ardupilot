@@ -1180,14 +1180,14 @@ void AP_OSD_Screen::draw_home(uint8_t x, uint8_t y)
         //计算出家的距离
         float distance = home_loc.get_distance(loc);
         //angel算出来的结果是0到36000
-        int32_t angle = wrap_360_cd(loc.get_bearing_to(home_loc) - ahrs.yaw_sensor);
+//        int32_t angle = wrap_360_cd(loc.get_bearing_to(home_loc) - ahrs.yaw_sensor);
         //interval=2250
         int32_t interval = 36000 / SYM_ARROW_COUNT;
-        if (distance < 2.0f) {
+//        if (distance < 2.0f) {
             //avoid fast rotating arrow at small distances
-            angle = 0;
-        }
-        char arrow = SYM_ARROW_START + ((angle + interval / 2) / interval) % SYM_ARROW_COUNT;
+//            angle = 0;
+//        }
+//        char arrow = SYM_ARROW_START + ((angle + interval / 2) / interval) % SYM_ARROW_COUNT;
         backend->write(x, y, false, "%c", SYM_HOME);
         draw_distance(x+1, y, distance);
         draw_radar(horizon_x,horizon_y,home_loc,loc,interval);
