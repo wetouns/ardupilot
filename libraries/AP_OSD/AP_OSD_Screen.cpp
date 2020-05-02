@@ -1079,12 +1079,12 @@ void AP_OSD_Screen::draw_message(uint8_t x, uint8_t y)
 void AP_OSD_Screen::draw_speed_vector(uint8_t x, uint8_t y,Vector2f v, int32_t yaw)
 {
     float v_length = v.length();
-    char arrow = SYM_ARROW_START;
-    if (v_length > 1.0f) {
-        int32_t angle = wrap_360_cd(DEGX100 * atan2f(v.y, v.x) - yaw);
-        int32_t interval = 36000 / SYM_ARROW_COUNT;
-        arrow = SYM_ARROW_START + ((angle + interval / 2) / interval) % SYM_ARROW_COUNT;
-    }
+//    char arrow = SYM_ARROW_START;
+//    if (v_length > 1.0f) {
+//        int32_t angle = wrap_360_cd(DEGX100 * atan2f(v.y, v.x) - yaw);
+//        int32_t interval = 36000 / SYM_ARROW_COUNT;
+//        arrow = SYM_ARROW_START + ((angle + interval / 2) / interval) % SYM_ARROW_COUNT;
+//    }
     if (u_scale(SPEED, v_length) < 10.0) {
         backend->write(x, y, false, "%3.1f%c", u_scale(SPEED, v_length), u_icon(SPEED));
     } else {
