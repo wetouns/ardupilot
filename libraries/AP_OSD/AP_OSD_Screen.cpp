@@ -1086,9 +1086,9 @@ void AP_OSD_Screen::draw_speed_vector(uint8_t x, uint8_t y,Vector2f v, int32_t y
         arrow = SYM_ARROW_START + ((angle + interval / 2) / interval) % SYM_ARROW_COUNT;
     }
     if (u_scale(SPEED, v_length) < 10.0) {
-        backend->write(x, y, false, "%c%3.1f%c", arrow, u_scale(SPEED, v_length), u_icon(SPEED)); 
+        backend->write(x, y, false, "%3.1f%c", u_scale(SPEED, v_length), u_icon(SPEED));
     } else {
-        backend->write(x, y, false, "%c%3d%c", arrow, (int)u_scale(SPEED, v_length), u_icon(SPEED));
+        backend->write(x, y, false, "%3d%c", (int)u_scale(SPEED, v_length), u_icon(SPEED));
     }
 }
 
@@ -1188,8 +1188,8 @@ void AP_OSD_Screen::draw_home(uint8_t x, uint8_t y)
             angle = 0;
         }
         char arrow = SYM_ARROW_START + ((angle + interval / 2) / interval) % SYM_ARROW_COUNT;
-        backend->write(x, y, false, "%c%c", SYM_HOME, arrow);
-        draw_distance(x+2, y, distance);
+        backend->write(x, y, false, "%c", SYM_HOME);
+        draw_distance(x+1, y, distance);
         draw_radar(horizon_x,horizon_y,home_loc,loc,interval);
     } else {
         backend->write(x, y, true, "%c", SYM_HOME);
