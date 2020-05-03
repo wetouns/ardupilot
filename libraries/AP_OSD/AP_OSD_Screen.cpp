@@ -959,8 +959,8 @@ void AP_OSD_Screen::draw_rssi(uint8_t x, uint8_t y)
         int rssiv = ap_rssi->read_receiver_rssi_uint8();
         rssiv = (rssiv * 99) / 255;
         backend->write(x, y, rssiv < osd->warn_rssi, "%c%2d", SYM_RSSI, rssiv);
-        //方位角
-        backend->write(x, y+1, false, "%3d%c", pos_angel, SYM_DEGR);
+//        方位角
+//        backend->write(x, y+1, false, "%3d%c", pos_angel, SYM_DEGR);
     }
 }
 
