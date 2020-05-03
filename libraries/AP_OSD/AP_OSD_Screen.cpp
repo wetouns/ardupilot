@@ -938,18 +938,18 @@ void AP_OSD_Screen::draw_bat_volt(uint8_t x, uint8_t y)
     backend->write(x,y, v < osd->warn_batvolt, "%c%2.1f%c", SYM_BATT_FULL + p, (double)v, SYM_VOLT);
 
     //获取电池S数，获取好之后就不用每次都去计算了
-    if (cells <= 0 && v > 0) {
-        float v_div = v * 10;
+//    if (cells <= 0 && v > 0) {
+//        float v_div = v * 10;
         //大于8.8v就是3，大于13.2v就是4s，大于17.6v就是5s,大于22v就是6
                 //算法的核心就是用44这个参数，最低是1s
-        cells = (v_div / 44) + 1;
-    }
+//        cells = (v_div / 44) + 1;
+//    }
     //单节电压画在总电压下边
     //DEBUG代码
 //    backend->write(1, 7, false, "%1d%c", cells,0x53);
     //输出5位，小数占2位
-    float v_per_cell = v/cells;
-    backend->write(x,y+1, false, "%5.2f%c", v_per_cell, SYM_VOLT);
+//    float v_per_cell = v/cells;
+//    backend->write(x,y+1, false, "%5.2f%c", v_per_cell, SYM_VOLT);
 }
 
 void AP_OSD_Screen::draw_rssi(uint8_t x, uint8_t y)
