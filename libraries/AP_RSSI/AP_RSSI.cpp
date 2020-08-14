@@ -318,6 +318,26 @@ float AP_RSSI::read_radio_remnoise(){
     return radio_remnoise;
 }
 
+void AP_RSSI::set_radio_remnoise(float value){
+    radio_remnoise = value;
+}
+
+void AP_RSSI::set_radio_rssi(float value){
+    radio_rssi = value;
+}
+
+void AP_RSSI::set_radio_remrssi(float value){
+    radio_remrssi = value;
+}
+
+void AP_RSSI::set_radio_noise(float value){
+    radio_noise = value;
+}
+
+
+
+
+
 AP_RSSI *AP_RSSI::_singleton = nullptr;
 
 namespace AP {

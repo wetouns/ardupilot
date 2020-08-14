@@ -55,6 +55,16 @@ public:
     // 0 represents weakest signal, 255 represents maximum signal.
     uint8_t read_receiver_rssi_uint8();   
 
+    float read_radio_rssi();
+    float read_radio_remrssi();
+    float read_radio_noise();
+    float read_radio_remnoise();
+
+    void set_radio_rssi(float value);
+    void set_radio_remrssi(float value);
+    void set_radio_noise(float value);
+    void set_radio_remnoise(float value);
+
     // parameter block
     static const struct AP_Param::GroupInfo var_info[];
 
@@ -89,10 +99,7 @@ private:
         uint32_t pulse_start_us;       // system time of start of pulse
     } pwm_state;
 
-    float read_radio_rssi();
-    float read_radio_remrssi();
-    float read_radio_noise();
-    float read_radio_remnoise();
+
     // read the RSSI value from an analog pin - returns float in range 0.0 to 1.0
     float read_pin_rssi();
 
