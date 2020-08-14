@@ -26,7 +26,8 @@ public:
         ANALOG_PIN         = 1,
         RC_CHANNEL_VALUE   = 2,
         RECEIVER           = 3,
-        PWM_PIN            = 4
+        PWM_PIN            = 4,
+        TELEMETRY_RADIO_RSSI = 5
     };
 
     AP_RSSI();
@@ -69,6 +70,10 @@ private:
     AP_Int8         rssi_channel;                           // allows rssi to be read from given channel as PWM value
     AP_Int16        rssi_channel_low_pwm_value;             // PWM value for weakest rssi signal
     AP_Int16        rssi_channel_high_pwm_value;            // PWM value for strongest rssi signal
+    AP_Float        radio_rssi;
+    AP_Float        radio_remrssi;
+    AP_Float        radio_noise;
+    AP_Float        radio_remnoise;
 
     // Analog Inputs
     // a pin for reading the receiver RSSI voltage. 
@@ -84,6 +89,10 @@ private:
         uint32_t pulse_start_us;       // system time of start of pulse
     } pwm_state;
 
+    float read_radio_rssi();
+    float read_radio_remrssi();
+    float read_radio_noise();
+    float read_radio_remnoise();
     // read the RSSI value from an analog pin - returns float in range 0.0 to 1.0
     float read_pin_rssi();
 

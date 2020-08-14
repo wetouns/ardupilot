@@ -611,6 +611,11 @@ void GCS_MAVLINK::handle_radio_status(const mavlink_message_t &msg, bool log_rad
 
     // record if the GCS has been receiving radio messages from
     // the aircraft
+    AP_RSSI *rssi = AP::rssi();
+    rssi->radio_remrssi = packet.remrssi/254.0f;
+    rssi->radio_rssi = packet.rssi/254.0f;
+    rssi->radio_noise = packet.noise;
+    rssi->radio_remnoise = packet.remnoise;
     if (packet.remrssi != 0) {
         last_radio_status_remrssi_ms = AP_HAL::millis();
     }

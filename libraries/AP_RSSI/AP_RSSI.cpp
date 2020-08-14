@@ -147,6 +147,8 @@ float AP_RSSI::read_receiver_rssi()
         }
         case RssiType::PWM_PIN:
             return read_pwm_pin_rssi();
+        case RssiType::TELEMETRY_RADIO_RSSI:
+                    return radio_rssi;
     }
     // should never get to here
     return 0.0f;
@@ -298,6 +300,22 @@ void AP_RSSI::irq_handler(uint8_t pin, bool pin_high, uint32_t timestamp_us)
             pwm_state.pulse_start_us = 0;
         }
     }
+}
+
+float AP_RSSI::read_radio_rssi(){
+    return radio_rssi;
+}
+
+float AP_RSSI::read_radio_remrssi(){
+    return radio_remrssi;
+}
+
+float AP_RSSI::read_radio_noise(){
+    return radio_noise;
+}
+
+float AP_RSSI::read_radio_remnoise(){
+    return radio_remnoise;
 }
 
 AP_RSSI *AP_RSSI::_singleton = nullptr;
