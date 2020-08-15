@@ -587,6 +587,14 @@ public:
         return _rsem;
     }
 
+    struct Target_Plane_Data {
+        int32_t lat; /*< [degE7] Target latitude, expressed*/
+        int32_t lon; /*< [degE7] Target longitude, expressed*/
+        int32_t alt; /*< [mm] Target altitude (MSL). Note that virtually all GPS modules provide both WGS84 and MSL.*/
+        float groundspeed; /*< [m/s] target urrent ground speed.*/
+        uint16_t heading; /*< [cdeg] target vehicle heading (yaw angle), 0.0..359.99 degrees. If unknown, set to: UINT16_MAX*/
+        } target_plane_data;
+
 protected:
     void update_nmea_out();
 

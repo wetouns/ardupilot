@@ -1149,7 +1149,11 @@ void GCS_MAVLINK_Plane::handleMessage(const mavlink_message_t &msg)
         handle_radio_status(msg, plane.should_log(MASK_LOG_PM));
         break;
     }
-
+    case MAVLINK_MSG_ID_TARGET_PLANE_INFO:
+        {
+            handle_target_plane_status(msg)
+            break;
+        }
     case MAVLINK_MSG_ID_DISTANCE_SENSOR:
         plane.rangefinder.handle_msg(msg);
         break;

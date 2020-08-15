@@ -650,6 +650,18 @@ void GCS_MAVLINK::handle_radio_status(const mavlink_message_t &msg, bool log_rad
 }
 
 /*
+ * 读取消息中的长机位置和高度相关信息
+ */
+void GCS_MAVLINK::handle_target_plane_status(const mavlink_target_plane_info_t &msg){
+    AP_AHRS &ahrs = AP::ahrs();
+    ahrs.target_plane_data.lat = msg.lat;
+    ahrs.target_plane_data.lon = msg.lon;
+    ahrs.target_plane_data.alt = msg.alt;
+    ahrs.target_plane_data.groundspeed = msg.groundspeed;
+    ahrs.target_plane_data.heading = msg.heading;
+}
+
+/*
   handle an incoming mission item
   return true if this is the last mission item, otherwise false
  */

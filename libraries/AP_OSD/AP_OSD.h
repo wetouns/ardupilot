@@ -132,6 +132,8 @@ private:
     AP_OSD_Setting bat2_vlt{false, 0, 0};
     AP_OSD_Setting bat2used{false, 0, 0};
     AP_OSD_Setting clk{false, 0, 0};
+    AP_OSD_Setting target{false, 0, 0};
+
 
     bool check_option(uint32_t option);
 
@@ -200,6 +202,7 @@ private:
     void draw_bat2_vlt(uint8_t x, uint8_t y);
     void draw_bat2used(uint8_t x, uint8_t y);
     void draw_clk(uint8_t x, uint8_t y);
+    void draw_target(uint8_t x, uint8_t y);
 };
 
 class AP_OSD

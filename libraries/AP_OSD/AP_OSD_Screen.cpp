@@ -1633,6 +1633,17 @@ void AP_OSD_Screen::draw_clk(uint8_t x, uint8_t y)
     }
 }
 
+//绘制跟踪长机的信息
+void AP_OSD_Screen::draw_target(uint8_t x, uint8_t y){
+    AP_AHRS &ahrs = AP::ahrs();
+//    backend->write(x, y, false, "%c%c", SYM_HOME, arrow);
+    backend->write(x,y, false, "%3d", ahrs.target_plane_data.alt);
+    backend->write(x,y+1, false, "%3d", ahrs.target_plane_data.groundspeed);
+    backend->write(x,y+2, false, "%3d", ahrs.target_plane_data.heading);
+    backend->write(x,y+3, false, "%3d", ahrs.target_plane_data.lat);
+    backend->write(x,y+4, false, "%3d", ahrs.target_plane_data.lon);
+}
+
 #define DRAW_SETTING(n) if (n.enabled) draw_ ## n(n.xpos, n.ypos)
 
 void AP_OSD_Screen::draw(void)
@@ -1675,6 +1686,7 @@ void AP_OSD_Screen::draw(void)
     DRAW_SETTING(hdop);
     DRAW_SETTING(flightime);
     DRAW_SETTING(clk);
+    DRAW_SETTING(target);
 
 #ifdef HAVE_AP_BLHELI_SUPPORT
     DRAW_SETTING(blh_temp);
