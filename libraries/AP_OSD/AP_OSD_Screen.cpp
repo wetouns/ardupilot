@@ -37,7 +37,6 @@
 
 #include <ctype.h>
 #include <GCS_MAVLink/GCS.h>
-#include "Location.h"
 
 const AP_Param::GroupInfo AP_OSD_Screen::var_info[] = {
 
