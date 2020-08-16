@@ -1728,12 +1728,12 @@ void AP_OSD_Screen::draw_target(uint8_t x, uint8_t y){
         }
         draw_distance(x+1, y+1, heightDist);
     }
-    backend->write(x, y, false, "%c%c", SYM_HOME, arrow);
-    backend->write(x,y, false, "%3d", ahrs.target_plane_data.alt);
-    backend->write(x,y+1, false, "%5d", ahrs.target_plane_data.groundspeed);
-    backend->write(x,y+2, false, "%3d", ahrs.target_plane_data.heading);
-    backend->write(x,y+3, false, "%3d", ahrs.target_plane_data.lat);
-    backend->write(x,y+4, false, "%3d", ahrs.target_plane_data.lon);
+//    backend->write(x, y, false, "%c%c", SYM_HOME, arrow);
+//    backend->write(x,y, false, "%3d", ahrs.target_plane_data.alt);
+//    backend->write(x,y+1, false, "%5d", ahrs.target_plane_data.groundspeed);
+//    backend->write(x,y+2, false, "%3d", ahrs.target_plane_data.heading);
+//    backend->write(x,y+3, false, "%3d", ahrs.target_plane_data.lat);
+//    backend->write(x,y+4, false, "%3d", ahrs.target_plane_data.lon);
 
 }
 
