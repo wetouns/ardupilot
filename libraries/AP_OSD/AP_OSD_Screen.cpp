@@ -967,7 +967,7 @@ void AP_OSD_Screen::draw_bat_volt(uint8_t x, uint8_t y)
     //    backend->write(1, 7, false, "%1d%c", cells,0x53);
         //输出5位，小数占2位
         float v_per_cell = v/cells;
-        backend->write(x,y, false, "%5.2f%c", v_per_cell, SYM_VOLT);
+        backend->write(x,y+1, false, "%5.2f%c", v_per_cell, SYM_VOLT);
 
 }
 
@@ -1727,6 +1727,7 @@ void AP_OSD_Screen::draw_target(uint8_t x, uint8_t y){
             backend->write(x, y+1, false, "%c", 0xee);
         }
         draw_distance(x+1, y+1, heightDist);
+        backend->write(x, y+2, false, "%c%c%3.1f%c", 0x54,0xe2, u_scale(SPEED, ahrs.target_plane_data.groundspeed), u_icon(SPEED));
     }
 //    backend->write(x, y, false, "%c%c", SYM_HOME, arrow);
 //    backend->write(x,y, false, "%3d", ahrs.target_plane_data.alt);
