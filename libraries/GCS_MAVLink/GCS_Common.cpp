@@ -652,13 +652,15 @@ void GCS_MAVLINK::handle_radio_status(const mavlink_message_t &msg, bool log_rad
 /*
  * 读取消息中的长机位置和高度相关信息
  */
-void GCS_MAVLINK::handle_target_plane_status(const mavlink_target_plane_info_t &msg){
+void GCS_MAVLINK::handle_target_plane_status(const mavlink_message_t &msg){
+    mavlink_target_plane_info_t packet;
+    mavlink_msg_target_plane_info_decode(&msg, &packet);
     AP_AHRS &ahrs = AP::ahrs();
-    ahrs.target_plane_data.lat = msg.lat;
-    ahrs.target_plane_data.lon = msg.lon;
-    ahrs.target_plane_data.alt = msg.alt;
-    ahrs.target_plane_data.groundspeed = msg.groundspeed;
-    ahrs.target_plane_data.heading = msg.heading;
+    ahrs.target_plane_data.lat = packet.lat;
+    ahrs.target_plane_data.lon = packet.lon;
+    ahrs.target_plane_data.alt = packet.alt;
+    ahrs.target_plane_data.groundspeed = packet.groundspeed;
+    ahrs.target_plane_data.heading = packet.heading;
 }
 
 /*
