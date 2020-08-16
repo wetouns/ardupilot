@@ -1679,7 +1679,7 @@ void AP_OSD_Screen::draw_target(uint8_t x, uint8_t y){
         //方位角的计算
         int32_t pos_ang = normalize_angle(bearing + 90);
         //得到与长机的相对角度
-        uint16_t relativeAngel = (bearing + 360) - myHeading;
+        uint16_t relativeAngel = (pos_ang + 360) - myHeading;
         if (relativeAngel > 360) {
             relativeAngel -= 360;
         }
@@ -1695,7 +1695,7 @@ void AP_OSD_Screen::draw_target(uint8_t x, uint8_t y){
             iconDg -= 360;
         }
         char arrowTarget = SYM_ARROW_START + ((iconDg*100 + interval / 2) / interval) % SYM_ARROW_COUNT;
-        char arrowMyDirection = SYM_ARROW_START + ((ahrs.yaw_sensor + interval / 2) / interval) % SYM_ARROW_COUNT;
+        char arrowMyDirection = SYM_ARROW_START + ((relativeAngel*100 + interval / 2) / interval) % SYM_ARROW_COUNT;
 
         //画出长机的heading和我要转的方向，以及和长机的距离
         backend->write(x, y, false, "%c", arrowTarget);
