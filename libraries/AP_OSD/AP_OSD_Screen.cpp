@@ -37,6 +37,7 @@
 
 #include <ctype.h>
 #include <GCS_MAVLink/GCS.h>
+#include "Location.h"
 
 const AP_Param::GroupInfo AP_OSD_Screen::var_info[] = {
 
@@ -92,6 +93,16 @@ const AP_Param::GroupInfo AP_OSD_Screen::var_info[] = {
     // @Description: Vertical position on screen
     // @Range: 0 15
     AP_SUBGROUPINFO(bat_volt, "BAT_VOLT", 5, AP_OSD_Screen, AP_OSD_Setting),
+
+    // @Param: BATVOLT_EN
+    // @DisplayName: BATVOLT_EN
+    // @Description: Displays main battery voltage
+    // @Values: 0:Disabled,1:Enabled
+
+    // @Param: BATVOLT_X
+    // @DisplayName: BATVOLT_X
+    // @Description: Horizontal position on screen
+    // @Range: 0 29
 
     // @Param: RSSI_EN
     // @DisplayName: RSSI_EN
@@ -707,6 +718,13 @@ const AP_Param::GroupInfo AP_OSD_Screen::var_info[] = {
     
     AP_SUBGROUPINFO(target, "TARGET", 44, AP_OSD_Screen, AP_OSD_Setting),
 
+    // @Param: BATVOLT_Y
+    // @DisplayName: BATVOLT_Y
+    // @Description: Vertical position on screen
+    // @Range: 0 15
+    AP_SUBGROUPINFO(batcell_volt, "BATCELL_VOLT", 45, AP_OSD_Screen, AP_OSD_Setting),
+    AP_SUBGROUPINFO(azimuth_angle, "AZIMUTH_ANGLE", 46, AP_OSD_Screen, AP_OSD_Setting),
+
     AP_GROUPEND
 };
 
@@ -939,6 +957,13 @@ void AP_OSD_Screen::draw_bat_volt(uint8_t x, uint8_t y)
     float v = battery.voltage();
     backend->write(x,y, v < osd->warn_batvolt, "%c%2.1f%c", SYM_BATT_FULL + p, (double)v, SYM_VOLT);
 
+
+}
+
+void AP_OSD_Screen::draw_batcell_volt(uint8_t x, uint8_t y)
+{
+    AP_BattMonitor &battery = AP::battery();
+    float v = battery.voltage();
     //获取电池S数，获取好之后就不用每次都去计算了
     if (cells <= 0 && v > 0) {
         float v_div = v * 10;
@@ -951,7 +976,7 @@ void AP_OSD_Screen::draw_bat_volt(uint8_t x, uint8_t y)
 //    backend->write(1, 7, false, "%1d%c", cells,0x53);
     //输出5位，小数占2位
     float v_per_cell = v/cells;
-    backend->write(x,y+1, false, "%5.2f%c", v_per_cell, SYM_VOLT);
+    backend->write(x,y, false, "%5.2f%c", v_per_cell, SYM_VOLT);
 }
 
 void AP_OSD_Screen::draw_rssi(uint8_t x, uint8_t y)
@@ -961,8 +986,6 @@ void AP_OSD_Screen::draw_rssi(uint8_t x, uint8_t y)
         int rssiv = ap_rssi->read_receiver_rssi_uint8();
         rssiv = (rssiv * 99) / 255;
         backend->write(x, y, rssiv < osd->warn_rssi, "%c%2d", SYM_RSSI, rssiv);
-        //方位角
-        backend->write(x, y+1, false, "%3d%c", pos_angel, SYM_DEGR);
     }
 }
 
@@ -1638,13 +1661,72 @@ void AP_OSD_Screen::draw_clk(uint8_t x, uint8_t y)
 //绘制跟踪长机的信息
 void AP_OSD_Screen::draw_target(uint8_t x, uint8_t y){
     AP_AHRS &ahrs = AP::ahrs();
+    AP_GPS & gps = AP::gps();
+    const Location &loc = gps.location();   // loc.lat and loc.lng
+    Location targetLoc;
+    targetLoc.lat = ahrs.target_plane_data.lat;
+    targetLoc.lng = ahrs.target_plane_data.lon;
+    if (ahrs.home_is_set()) {
+        uint16_t myHeading = ahrs.yaw_sensor / 100;
+        int dst_x, dst_y;
+    //    float factor = 0.011131884502145034f;
+        //0.0174532925的值是1个弧度的意思，也就是PI/180，scaleLongDown参数保存的是不同纬度下，经度的距离缩放比例
+        float scaleLongDown = fabsf(cosf(fabsf(ahrs.target_plane_data.lat / 10000000L) * 0.0174532925f));
+        //计算出飞机位置到家位置的X轴和Y轴的垂直距离,单位是米,1度是111319.5米
+        dst_y = diff_coord(loc.lat , ahrs.target_plane_data.lat);
+        //在不同纬度上，1度的经度变化的距离是不一样的,所以要乘上scaleLongDown来做一个缩放以算出实际距离
+        dst_x = diff_coord(loc.lng,ahrs.target_plane_data.lon) * scaleLongDown;
+        int32_t bearing = atan2f(dst_y, -dst_x) * 57.295775;
+        //方位角的计算
+        int32_t pos_ang = normalize_angle(bearing + 90);
+        //得到与长机的相对角度
+        uint16_t relativeAngel = (bearing + 360) - myHeading;
+        if (relativeAngel > 360) {
+            relativeAngel -= 360;
+        }
+        //算出我和长机的高度差
+        int32_t heightDist = loc.alt - ahrs.target_plane_data.alt;
+        //算出我与长机的距离
+        float distance = loc.get_distance(targetLoc);
+
+        //interval=2250
+        int32_t interval = 36000 / SYM_ARROW_COUNT;
+        int16_t iconDg = ahrs.target_plane_data.heading + 360 - myHeading;
+        if (iconDg > 360) {
+            iconDg -= 360;
+        }
+        char arrowTarget = SYM_ARROW_START + ((iconDg*100 + interval / 2) / interval) % SYM_ARROW_COUNT;
+        char arrowMyDirection = SYM_ARROW_START + ((ahrs.yaw_sensor + interval / 2) / interval) % SYM_ARROW_COUNT;
+
+        //画出长机的heading和我要转的方向，以及和长机的距离
+        backend->write(x, y, false, "%c", arrowTarget);
+        backend->write(x+1, y, false, "%c%c", arrowMyDirection,0xa0);
+        draw_distance(x+3, y, distance);
+
+        //画出高度差
+        if(heightDist >= 0 && heightDist <= 10){
+            backend->write(x, y+1, false, "%c", 0x2d);
+        }else if(heightDist > 10){
+            //如果比长机高，就要显示向下箭头，指示飞机向下飞
+            backend->write(x, y+1, false, "%c", 0xed);
+        }else if(heightDist < 0){
+            //如果比长机低，就要显示向上箭头，指示飞机向上飞
+            backend->write(x, y+1, false, "%c", 0xee);
+        }
+        draw_distance(x+1, y+1, heightDist);
+    }
 //    backend->write(x, y, false, "%c%c", SYM_HOME, arrow);
-    backend->write(x,y, false, "%3d", ahrs.target_plane_data.alt);
-    backend->write(x,y+1, false, "%5.2f", ahrs.target_plane_data.groundspeed);
-    backend->write(x,y+2, false, "%3d", ahrs.target_plane_data.heading);
-    backend->write(x,y+3, false, "%3d", ahrs.target_plane_data.lat);
-    backend->write(x,y+4, false, "%3d", ahrs.target_plane_data.lon);
-    backend->write(x,y+5, false, "%5d", ahrs.target_plane_data.msgid);
+//    backend->write(x,y, false, "%3d", ahrs.target_plane_data.alt);
+//    backend->write(x,y+1, false, "%5d", ahrs.target_plane_data.groundspeed);
+//    backend->write(x,y+2, false, "%3d", ahrs.target_plane_data.heading);
+//    backend->write(x,y+3, false, "%3d", ahrs.target_plane_data.lat);
+//    backend->write(x,y+4, false, "%3d", ahrs.target_plane_data.lon);
+
+}
+
+void AP_OSD_Screen::draw_azimuth_angle(uint8_t x, uint8_t y){
+    //方位角
+    backend->write(x, y, false, "%3d%c", pos_angel, SYM_DEGR);
 }
 
 #define DRAW_SETTING(n) if (n.enabled) draw_ ## n(n.xpos, n.ypos)
@@ -1665,6 +1747,7 @@ void AP_OSD_Screen::draw(void)
     DRAW_SETTING(waypoint);
     DRAW_SETTING(xtrack_error);
     DRAW_SETTING(bat_volt);
+    DRAW_SETTING(batcell_volt);
     DRAW_SETTING(bat2_vlt);
     DRAW_SETTING(current);
     DRAW_SETTING(batused);
@@ -1690,6 +1773,7 @@ void AP_OSD_Screen::draw(void)
     DRAW_SETTING(flightime);
     DRAW_SETTING(clk);
     DRAW_SETTING(target);
+    DRAW_SETTING(azimuth_angle);
 
 #ifdef HAVE_AP_BLHELI_SUPPORT
     DRAW_SETTING(blh_temp);
