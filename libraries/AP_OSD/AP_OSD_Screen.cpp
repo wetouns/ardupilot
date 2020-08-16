@@ -1659,61 +1659,61 @@ void AP_OSD_Screen::draw_clk(uint8_t x, uint8_t y)
 
 //绘制跟踪长机的信息
 void AP_OSD_Screen::draw_target(uint8_t x, uint8_t y){
-    AP_AHRS &ahrs = AP::ahrs();
-    AP_GPS & gps = AP::gps();
-    const Location &loc = gps.location();   // loc.lat and loc.lng
-    Location targetLoc;
-    targetLoc.lat = ahrs.target_plane_data.lat;
-    targetLoc.lng = ahrs.target_plane_data.lon;
-    if (ahrs.home_is_set()) {
-        uint16_t myHeading = ahrs.yaw_sensor / 100;
-        int dst_x, dst_y;
-    //    float factor = 0.011131884502145034f;
-        //0.0174532925的值是1个弧度的意思，也就是PI/180，scaleLongDown参数保存的是不同纬度下，经度的距离缩放比例
-        float scaleLongDown = fabsf(cosf(fabsf(ahrs.target_plane_data.lat / 10000000L) * 0.0174532925f));
-        //计算出飞机位置到家位置的X轴和Y轴的垂直距离,单位是米,1度是111319.5米
-        dst_y = diff_coord(loc.lat , ahrs.target_plane_data.lat);
-        //在不同纬度上，1度的经度变化的距离是不一样的,所以要乘上scaleLongDown来做一个缩放以算出实际距离
-        dst_x = diff_coord(loc.lng,ahrs.target_plane_data.lon) * scaleLongDown;
-        int32_t bearing = atan2f(dst_y, -dst_x) * 57.295775;
-        //方位角的计算
-        int32_t pos_ang = normalize_angle(bearing + 90);
-        //得到与长机的相对角度
-        uint16_t relativeAngel = (pos_ang + 360) - myHeading;
-        if (relativeAngel > 360) {
-            relativeAngel -= 360;
-        }
-        //算出我和长机的高度差
-        int32_t heightDist = loc.alt - ahrs.target_plane_data.alt;
-        //算出我与长机的距离
-        float distance = loc.get_distance(targetLoc);
-
-        //interval=2250
-        int32_t interval = 36000 / SYM_ARROW_COUNT;
-        int16_t iconDg = ahrs.target_plane_data.heading + 360 - myHeading;
-        if (iconDg > 360) {
-            iconDg -= 360;
-        }
-        char arrowTarget = SYM_ARROW_START + ((iconDg*100 + interval / 2) / interval) % SYM_ARROW_COUNT;
-        char arrowMyDirection = SYM_ARROW_START + ((relativeAngel*100 + interval / 2) / interval) % SYM_ARROW_COUNT;
-
-        //画出长机的heading和我要转的方向，以及和长机的距离
-        backend->write(x, y, false, "%c", arrowTarget);
-        backend->write(x+1, y, false, "%c%c", arrowMyDirection,0xa0);
-        draw_distance(x+3, y, distance);
-
-        //画出高度差
-        if(heightDist >= 0 && heightDist <= 10){
-            backend->write(x, y+1, false, "%c", 0x2d);
-        }else if(heightDist > 10){
-            //如果比长机高，就要显示向下箭头，指示飞机向下飞
-            backend->write(x, y+1, false, "%c", 0xed);
-        }else if(heightDist < 0){
-            //如果比长机低，就要显示向上箭头，指示飞机向上飞
-            backend->write(x, y+1, false, "%c", 0xee);
-        }
-        draw_distance(x+1, y+1, heightDist);
-    }
+//    AP_AHRS &ahrs = AP::ahrs();
+//    AP_GPS & gps = AP::gps();
+//    const Location &loc = gps.location();   // loc.lat and loc.lng
+//    Location targetLoc;
+//    targetLoc.lat = ahrs.target_plane_data.lat;
+//    targetLoc.lng = ahrs.target_plane_data.lon;
+//    if (ahrs.home_is_set()) {
+//        uint16_t myHeading = ahrs.yaw_sensor / 100;
+//        int dst_x, dst_y;
+//    //    float factor = 0.011131884502145034f;
+//        //0.0174532925的值是1个弧度的意思，也就是PI/180，scaleLongDown参数保存的是不同纬度下，经度的距离缩放比例
+//        float scaleLongDown = fabsf(cosf(fabsf(ahrs.target_plane_data.lat / 10000000L) * 0.0174532925f));
+//        //计算出飞机位置到家位置的X轴和Y轴的垂直距离,单位是米,1度是111319.5米
+//        dst_y = diff_coord(loc.lat , ahrs.target_plane_data.lat);
+//        //在不同纬度上，1度的经度变化的距离是不一样的,所以要乘上scaleLongDown来做一个缩放以算出实际距离
+//        dst_x = diff_coord(loc.lng,ahrs.target_plane_data.lon) * scaleLongDown;
+//        int32_t bearing = atan2f(dst_y, -dst_x) * 57.295775;
+//        //方位角的计算
+//        int32_t pos_ang = normalize_angle(bearing + 90);
+//        //得到与长机的相对角度
+//        uint16_t relativeAngel = (pos_ang + 360) - myHeading;
+//        if (relativeAngel > 360) {
+//            relativeAngel -= 360;
+//        }
+//        //算出我和长机的高度差
+//        int32_t heightDist = loc.alt - ahrs.target_plane_data.alt;
+//        //算出我与长机的距离
+//        float distance = loc.get_distance(targetLoc);
+//
+//        //interval=2250
+//        int32_t interval = 36000 / SYM_ARROW_COUNT;
+//        int16_t iconDg = ahrs.target_plane_data.heading + 360 - myHeading;
+//        if (iconDg > 360) {
+//            iconDg -= 360;
+//        }
+//        char arrowTarget = SYM_ARROW_START + ((iconDg*100 + interval / 2) / interval) % SYM_ARROW_COUNT;
+//        char arrowMyDirection = SYM_ARROW_START + ((relativeAngel*100 + interval / 2) / interval) % SYM_ARROW_COUNT;
+//
+//        //画出长机的heading和我要转的方向，以及和长机的距离
+//        backend->write(x, y, false, "%c", arrowTarget);
+//        backend->write(x+1, y, false, "%c%c", arrowMyDirection,0xa0);
+//        draw_distance(x+3, y, distance);
+//
+//        //画出高度差
+//        if(heightDist >= 0 && heightDist <= 10){
+//            backend->write(x, y+1, false, "%c", 0x2d);
+//        }else if(heightDist > 10){
+//            //如果比长机高，就要显示向下箭头，指示飞机向下飞
+//            backend->write(x, y+1, false, "%c", 0xed);
+//        }else if(heightDist < 0){
+//            //如果比长机低，就要显示向上箭头，指示飞机向上飞
+//            backend->write(x, y+1, false, "%c", 0xee);
+//        }
+//        draw_distance(x+1, y+1, heightDist);
+//    }
 //    backend->write(x, y, false, "%c%c", SYM_HOME, arrow);
 //    backend->write(x,y, false, "%3d", ahrs.target_plane_data.alt);
 //    backend->write(x,y+1, false, "%5d", ahrs.target_plane_data.groundspeed);

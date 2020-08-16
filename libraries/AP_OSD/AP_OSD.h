@@ -90,8 +90,6 @@ private:
 
     AP_OSD_Setting altitude{true, 23, 8};
     AP_OSD_Setting bat_volt{true, 24, 1};
-    AP_OSD_Setting azimuth_angle{true, 2, 2};
-    AP_OSD_Setting batcell_volt{true, 24, 2};
     AP_OSD_Setting rssi{true, 1, 1};
     AP_OSD_Setting current{true, 25, 2};
     AP_OSD_Setting batused{true, 23, 3};
@@ -135,6 +133,8 @@ private:
     AP_OSD_Setting bat2used{false, 0, 0};
     AP_OSD_Setting clk{false, 0, 0};
     AP_OSD_Setting target{false, 0, 0};
+    AP_OSD_Setting batcell_volt{true, 24, 2};
+    AP_OSD_Setting azimuth_angle{true, 2, 2};
 
 
     bool check_option(uint32_t option);
@@ -154,7 +154,6 @@ private:
 
     void draw_altitude(uint8_t x, uint8_t y);
     void draw_bat_volt(uint8_t x, uint8_t y);
-    void draw_batcell_volt(uint8_t x, uint8_t y);
     void draw_rssi(uint8_t x, uint8_t y);
     void draw_current(uint8_t x, uint8_t y);
     void draw_batused(uint8_t x, uint8_t y);
@@ -206,6 +205,7 @@ private:
     void draw_bat2used(uint8_t x, uint8_t y);
     void draw_clk(uint8_t x, uint8_t y);
     void draw_target(uint8_t x, uint8_t y);
+    void draw_batcell_volt(uint8_t x, uint8_t y);
     void draw_azimuth_angle(uint8_t x, uint8_t y);
 };
 
