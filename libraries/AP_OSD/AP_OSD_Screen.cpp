@@ -1644,6 +1644,7 @@ void AP_OSD_Screen::draw_target(uint8_t x, uint8_t y){
     backend->write(x,y+2, false, "%3d", ahrs.target_plane_data.heading);
     backend->write(x,y+3, false, "%3d", ahrs.target_plane_data.lat);
     backend->write(x,y+4, false, "%3d", ahrs.target_plane_data.lon);
+    backend->write(x,y+5, false, "%3d", ahrs.target_plane_data.msgid);
 }
 
 #define DRAW_SETTING(n) if (n.enabled) draw_ ## n(n.xpos, n.ypos)

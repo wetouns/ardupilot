@@ -1015,6 +1015,8 @@ MAV_RESULT GCS_MAVLINK_Plane::handle_command_long_packet(const mavlink_command_l
 
 void GCS_MAVLINK_Plane::handleMessage(const mavlink_message_t &msg)
 {
+    AP_AHRS &ahrs = AP::ahrs();
+    ahrs.target_plane_data.msgid = msg.msgid;
     switch (msg.msgid) {
 
 #if GEOFENCE_ENABLED == ENABLED
