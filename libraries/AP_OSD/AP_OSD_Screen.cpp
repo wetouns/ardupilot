@@ -1698,7 +1698,7 @@ void AP_OSD_Screen::draw_target(uint8_t x, uint8_t y){
             relativeAngel -= 360;
         }
         //算出我和长机的高度差
-        int32_t heightDist = loc.alt - ahrs.target_plane_data.alt;
+        int32_t heightDist = (loc.alt - ahrs.target_plane_data.alt)/100;
         //算出我与长机的距离
         float distance = loc.get_distance(targetLoc);
 
