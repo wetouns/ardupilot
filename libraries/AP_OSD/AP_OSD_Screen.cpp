@@ -1715,7 +1715,7 @@ void AP_OSD_Screen::draw_target(uint8_t x, uint8_t y){
         char arrowMyDirection = SYM_ARROW_START + ((relativeAngel*100 + interval / 2) / interval) % SYM_ARROW_COUNT;
 
         //画出长机的heading和我要转的方向，以及和长机的距离
-        backend->write(x, y, connected, "%c%c", arrowTarget,0xa0);
+        backend->write(x, y, !connected, "%c%c", arrowTarget,0xa0);
         draw_distance(x+2, y, distance);
 
         backend->write(x, y+1, false, "%c%c%3.1f%c", 0x54,0xe2, u_scale(SPEED, ahrs.target_plane_data.groundspeed), u_icon(SPEED));
