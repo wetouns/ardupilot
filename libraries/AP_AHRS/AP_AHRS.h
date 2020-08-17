@@ -594,7 +594,7 @@ public:
         float groundspeed; /*< [m/s] target urrent ground speed.*/
         uint16_t heading;
         uint32_t last_data_ms;/*< [cdeg] target vehicle heading (yaw angle), 0.0..359.99 degrees. If unknown, set to: UINT16_MAX*/
-        } target_plane_data;
+        } target_plane_data={0,0,0,0,0,0};
 
 protected:
     void update_nmea_out();
