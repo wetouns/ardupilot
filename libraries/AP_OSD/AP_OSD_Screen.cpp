@@ -1677,7 +1677,7 @@ void AP_OSD_Screen::draw_target(uint8_t x, uint8_t y){
     AP_GPS & gps = AP::gps();
     uint32_t data_time = AP_HAL::millis() - ahrs.target_plane_data.last_data_ms;
     //判断是否连接
-    bool disconnected = data_time > 5000;
+    bool connected = data_time < 5000;
     const Location &loc = gps.location();   // loc.lat and loc.lng
     Location targetLoc;
     targetLoc.lat = ahrs.target_plane_data.lat;
@@ -1715,7 +1715,7 @@ void AP_OSD_Screen::draw_target(uint8_t x, uint8_t y){
         char arrowMyDirection = SYM_ARROW_START + ((relativeAngel*100 + interval / 2) / interval) % SYM_ARROW_COUNT;
 
         //画出长机的heading和我要转的方向，以及和长机的距离
-        backend->write(x, y, disconnected, "%c%c", arrowTarget,0xa0);
+        backend->write(x, y, !connected, "%c%c", arrowTarget,0xa0);
         draw_distance(x+2, y, distance);
 
         backend->write(x, y+1, false, "%c%c%3.1f%c", 0x54,0xe2, u_scale(SPEED, ahrs.target_plane_data.groundspeed), u_icon(SPEED));
@@ -1730,7 +1730,7 @@ void AP_OSD_Screen::draw_target(uint8_t x, uint8_t y){
             backend->write(x+1, y+2, false, "%c", 0xed);
         }else if(heightDist < 0){
             //如果比长机低，就要显示向上箭头，指示飞机向上飞
-            backend->write(x+1, y+2, false, "%c", 0xee);
+            backend->write(x+1, y+2, false, "%c", 0xec);
         }
         //高度差
         draw_distance(x+2, y+2, heightDist);
