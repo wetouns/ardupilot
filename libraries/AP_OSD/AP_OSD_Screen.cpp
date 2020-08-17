@@ -1715,21 +1715,23 @@ void AP_OSD_Screen::draw_target(uint8_t x, uint8_t y){
         backend->write(x, y, false, "%c%c", arrowTarget,0xa0);
         draw_distance(x+2, y, distance);
 
-        backend->write(x, y+1, false, "%c", arrowMyDirection);
+        backend->write(x, y+1, false, "%c%c%3.1f%c", 0x54,0xe2, u_scale(SPEED, ahrs.target_plane_data.groundspeed), u_icon(SPEED));
 
-
+        //我要去的方向
+        backend->write(x, y+2, false, "%c", arrowMyDirection);
         //画出高度差
         if(heightDist >= 0 && heightDist <= 10){
-            backend->write(x+1, y+1, false, "%c", 0x2d);
+            backend->write(x+1, y+2, false, "%c", 0x2d);
         }else if(heightDist > 10){
             //如果比长机高，就要显示向下箭头，指示飞机向下飞
-            backend->write(x+1, y+1, false, "%c", 0xed);
+            backend->write(x+1, y+2, false, "%c", 0xed);
         }else if(heightDist < 0){
             //如果比长机低，就要显示向上箭头，指示飞机向上飞
-            backend->write(x+1, y+1, false, "%c", 0xee);
+            backend->write(x+1, y+2, false, "%c", 0xee);
         }
-        draw_distance(x+2, y+1, heightDist);
-        backend->write(x, y+2, false, "%c%c%3.1f%c", 0x54,0xe2, u_scale(SPEED, ahrs.target_plane_data.groundspeed), u_icon(SPEED));
+        //高度差
+        draw_distance(x+2, y+2, heightDist);
+
     }
 //    backend->write(x, y, false, "%c%c", SYM_HOME, arrow);
 //    backend->write(x,y, false, "%3d", ahrs.target_plane_data.alt);
