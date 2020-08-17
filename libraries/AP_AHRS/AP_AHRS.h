@@ -592,7 +592,8 @@ public:
         int32_t lon; /*< [degE7] Target longitude, expressed*/
         int32_t alt; /*< [mm] Target altitude (MSL). Note that virtually all GPS modules provide both WGS84 and MSL.*/
         float groundspeed; /*< [m/s] target urrent ground speed.*/
-        uint16_t heading; /*< [cdeg] target vehicle heading (yaw angle), 0.0..359.99 degrees. If unknown, set to: UINT16_MAX*/
+        uint16_t heading;
+        uint32_t last_data_ms;/*< [cdeg] target vehicle heading (yaw angle), 0.0..359.99 degrees. If unknown, set to: UINT16_MAX*/
         } target_plane_data;
 
 protected:
