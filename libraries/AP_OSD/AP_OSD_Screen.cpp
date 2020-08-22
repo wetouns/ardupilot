@@ -1674,14 +1674,17 @@ void AP_OSD_Screen::draw_clk(uint8_t x, uint8_t y)
 //绘制跟踪长机的信息
 void AP_OSD_Screen::draw_target(uint8_t x, uint8_t y){
     AP_AHRS &ahrs = AP::ahrs();
-    AP_GPS & gps = AP::gps();
+//    AP_GPS & gps = AP::gps();
     uint32_t data_time = AP_HAL::millis() - ahrs.target_plane_data.last_data_ms;
     //判断是否连接
     bool connected = data_time < 5000;
-    const Location &loc = gps.location();   // loc.lat and loc.lng
-    Location targetLoc;
+//    const Location &loc = gps.location();   // loc.lat and loc.lng
+    Location targetLoc,myLoc;
     targetLoc.lat = ahrs.target_plane_data.lat;
     targetLoc.lng = ahrs.target_plane_data.lon;
+    myLoc.lat = ahrs.target_plane_data.my_lat;
+    myLoc.lng = ahrs.target_plane_data.my_lon;
+    myLoc.alt = ahrs.target_plane_data.my_alt;
     if (ahrs.home_is_set()) {
         uint16_t myHeading = ahrs.yaw_sensor / 100;
         int dst_x, dst_y;
@@ -1689,9 +1692,9 @@ void AP_OSD_Screen::draw_target(uint8_t x, uint8_t y){
         //0.0174532925的值是1个弧度的意思，也就是PI/180，scaleLongDown参数保存的是不同纬度下，经度的距离缩放比例
         float scaleLongDown = fabsf(cosf(fabsf(ahrs.target_plane_data.lat / 10000000L) * 0.0174532925f));
         //计算出飞机位置到家位置的X轴和Y轴的垂直距离,单位是米,1度是111319.5米
-        dst_y = diff_coord(loc.lat , ahrs.target_plane_data.lat);
+        dst_y = diff_coord(myLoc.lat , ahrs.target_plane_data.lat);
         //在不同纬度上，1度的经度变化的距离是不一样的,所以要乘上scaleLongDown来做一个缩放以算出实际距离
-        dst_x = diff_coord(loc.lng,ahrs.target_plane_data.lon) * scaleLongDown;
+        dst_x = diff_coord(myLoc.lng,ahrs.target_plane_data.lon) * scaleLongDown;
         int32_t bearing = atan2f(dst_y, -dst_x) * 57.295775;
         //方位角的计算
         int32_t pos_ang = normalize_angle(bearing + 90);
@@ -1701,9 +1704,9 @@ void AP_OSD_Screen::draw_target(uint8_t x, uint8_t y){
             relativeAngel -= 360;
         }
         //算出我和长机的高度差
-        int32_t heightDist = (loc.alt - ahrs.target_plane_data.alt)/100;
+        int32_t heightDist = (myLoc.alt - ahrs.target_plane_data.alt)/100;
         //算出我与长机的距离
-        float distance = loc.get_distance(targetLoc);
+        float distance = myLoc.get_distance(targetLoc);
 
         //interval=2250
         int32_t interval = 36000 / SYM_ARROW_COUNT;
@@ -1746,7 +1749,7 @@ void AP_OSD_Screen::draw_target(uint8_t x, uint8_t y){
 }
 
 //void AP_OSD_Screen::draw_azimuth_angle(uint8_t x, uint8_t y){
-//    //方位角
+    //方位角
 //    backend->write(x, y, false, "%3d%c", pos_angel, SYM_DEGR);
 //}
 

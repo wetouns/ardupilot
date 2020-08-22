@@ -659,6 +659,9 @@ void GCS_MAVLINK::handle_target_plane_status(const mavlink_message_t &msg){
     ahrs.target_plane_data.lat = packet.lat;
     ahrs.target_plane_data.lon = packet.lon;
     ahrs.target_plane_data.alt = packet.alt;
+    ahrs.target_plane_data.my_lat = packet.my_lat;
+    ahrs.target_plane_data.my_lon = packet.my_lon;
+    ahrs.target_plane_data.my_alt = packet.my_alt;
     ahrs.target_plane_data.groundspeed = packet.groundspeed;
     ahrs.target_plane_data.heading = packet.heading;
     ahrs.target_plane_data.last_data_ms = AP_HAL::millis();
